@@ -1,9 +1,12 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../providers/users_provider.dart';
-import '../providers/stats_provider.dart';
+import '../services/firebase_service.dart';
+import '../services/widget_service.dart';
 import '../theme_constants.dart';
+import '../providers/stats_provider.dart';
+import '../providers/users_provider.dart';
+import 'chat_detail_screen.dart';
 import 'chats_list_screen.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 class UsersListScreen extends ConsumerStatefulWidget {
@@ -32,6 +35,13 @@ class _UsersListScreenState extends ConsumerState<UsersListScreen> {
     final filteredUsers = ref.watch(filteredUsersProvider);
     final usersAsync = ref.watch(usersFutureProvider);
     final statsAsync = ref.watch(statsProvider);
+
+    // Sync stats with iOS Home Widget whenever they are loaded or refreshed
+    ref.listen(statsProvider, (previous, next) {
+      if (next is AsyncData<Map<String, int>>) {
+        WidgetService.updateWidgetData(next.value);
+      }
+    });
 
     return CupertinoPageScaffold(
       backgroundColor: AdminTheme.surfaceGrey,
